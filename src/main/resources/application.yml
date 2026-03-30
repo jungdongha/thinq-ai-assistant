@@ -1,0 +1,24 @@
+server:
+  port: 8081
+
+spring:
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}
+        chat:
+          options:
+            model: gemini-1.5-flash
+    anthropic:
+      api-key: ${CLAUDE_API_KEY}
+      chat:
+        options:
+          model: claude-sonnet-4-6
+thinq:
+  pat-token: ${THINQ_PAT_TOKEN}      # LG ThinQ PAT 토큰
+
+logging:
+  level:
+    org.springframework.ai: DEBUG
+
+
