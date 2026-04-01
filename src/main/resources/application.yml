@@ -16,6 +16,8 @@ spring:
           model: claude-sonnet-4-6
 thinq:
   pat-token: ${THINQ_PAT_TOKEN}      # LG ThinQ PAT 토큰
+  base-url: ${THINQ_BASE_URL}
+  api-key: ${THINQ_API_KEY}
 
 logging:
   level:
