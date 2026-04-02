@@ -5,13 +5,13 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public class AiService {
-    private final ChatClient chatClient;
-    private final ChatClient groqChatClient;
+    private final Map<String, ChatClient> chatClients;
     private final ChatMemory chatMemory;
     private final ThinQDeviceTools thinQDeviceTools;
     private final ThinQRouteTools thinQRouteTools;
@@ -20,8 +20,7 @@ public class AiService {
     private final ThinQEnergyTools thinQEnergyTools;
 
     public AiService(
-            @Qualifier("claudeChatClient") ChatClient chatClient,
-            @Qualifier("groqChatClient") ChatClient groqChatClient,
+            Map<String, ChatClient> chatClients,
             ChatMemory chatMemory,
             ThinQDeviceTools thinQDeviceTools,
             ThinQRouteTools thinQRouteTools,
@@ -29,8 +28,7 @@ public class AiService {
             ThinQEventTools thinQEventTools,
             ThinQEnergyTools thinQEnergyTools
     ) {
-        this.chatClient = chatClient;
-        this.groqChatClient = groqChatClient;
+        this.chatClients = chatClients;
         this.chatMemory = chatMemory;
         this.thinQDeviceTools = thinQDeviceTools;
         this.thinQRouteTools = thinQRouteTools;
@@ -39,31 +37,22 @@ public class AiService {
         this.thinQEnergyTools = thinQEnergyTools;
     }
 
-    public String chatGroq(String conversationId, String message) {
-        return groqChatClient.prompt()
-                .user(message)
-                .advisors(spec -> spec
-                        .advisors(
-                                new SimpleLoggerAdvisor(),
-                                MessageChatMemoryAdvisor.builder(chatMemory)
-                                        .conversationId(conversationId)
-                                        .build()
-                        )
-                        .param("conversationId", conversationId))
-                .tools(thinQDeviceTools, thinQRouteTools, thinQPushTools, thinQEventTools, thinQEnergyTools)
-                .call()
-                .content();
-    }
+    public String chat(String modelName, String conversationId, String message) {
+        // 기본값: groqChatClient
+        String clientBeanName = "groqChatClient";
+        
+        // 요청된 모델명이 있고 해당 빈이 존재하면 교체
+        if (modelName != null && chatClients.containsKey(modelName + "ChatClient")) {
+            clientBeanName = modelName + "ChatClient";
+        }
+        
+        ChatClient selectedClient = chatClients.get(clientBeanName);
 
-    public String chat(String conversationId, String message) {
-        return chatClient.prompt()
+        return selectedClient.prompt()
                 .user(message)
                 .advisors(spec -> spec
-                        //작성한 순서대로 실행
                         .advisors(
-                                //로깅
                                 new SimpleLoggerAdvisor(),
-                                //메모리
                                 MessageChatMemoryAdvisor.builder(chatMemory)
                                         .conversationId(conversationId)
                                         .build()
