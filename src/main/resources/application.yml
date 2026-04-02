@@ -1,7 +1,15 @@
 server:
   port: 8081
 
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD}
+    algorithm: ${JASYPT_ALGORITHM}
+    iv-generator-classname: org.jasypt.iv.NoIvGenerator
+
 spring:
+  config:
+    import: "optional:file:.env[.properties]"
   ai:
     google:
       genai:
@@ -14,10 +22,19 @@ spring:
       chat:
         options:
           model: claude-sonnet-4-6
+    groq:
+      api-key: "ENC(+5/WV2+Zd+WiY7VnKsN/4aKtOsts3bq5zj2NB8vFDVtZ/RwSmgfH3M84mqjKfUUOhfclZHlDj+q311C7S/4eOJuvPg46h1/m)"
+      base-url: "https://api.groq.com/openai"
+      model: "meta-llama/llama-4-scout-17b-16e-instruct"
+      max-tokens: 4096
+    openai:
+      api-key: "dummy"  # groq에서 수동으로 OpenAiApi 생성하므로 auto-config 비활성화용
+
 thinq:
-  pat-token: ${THINQ_PAT_TOKEN}      # LG ThinQ PAT 토큰
+  pat-token: ${THINQ_PAT_TOKEN}
   base-url: ${THINQ_BASE_URL}
   api-key: ${THINQ_API_KEY}
+  client-id: ${THINQ_CLIENT_ID}
 
 logging:
   level:

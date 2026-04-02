@@ -31,6 +31,7 @@ dependencies {
     //basic
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     //lombok
     compileOnly("org.projectlombok:lombok")
@@ -54,6 +55,12 @@ dependencies {
 
     //claude
     implementation("org.springframework.ai:spring-ai-starter-model-anthropic")
+
+    //groq (openai-compatible)
+    implementation("org.springframework.ai:spring-ai-starter-model-openai")
+
+    //jasypt (yml 암호화)
+    implementation("com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5")
 }
 dependencyManagement {
     imports {
@@ -63,4 +70,17 @@ dependencyManagement {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+// .env 파일을 bootRun 환경변수로 자동 로드
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    val envFile = file(".env")
+    if (envFile.exists()) {
+        envFile.readLines()
+            .filter { it.isNotBlank() && !it.startsWith("#") && it.contains("=") }
+            .forEach { line ->
+                val (key, value) = line.split("=", limit = 2)
+                environment(key.trim(), value.trim())
+            }
+    }
 }

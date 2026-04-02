@@ -21,12 +21,22 @@ public class AiController {
     private final AiService aiService;
 
     @PostMapping("/chat")
-    @Operation(summary = "ThinQ AI 채팅", description = "AI에게 메시지를 보내고 응답을 받습니다")
+    @Operation(summary = "ThinQ AI 채팅 (Claude)", description = "Claude AI에게 메시지를 보내고 응답을 받습니다")
     public ChatResponse chat(@RequestBody ChatRequest request) {
         String conversationId = request.conversationId() != null
                 ? request.conversationId()
                 : UUID.randomUUID().toString();
         String content = aiService.chat(conversationId, request.message());
+        return new ChatResponse(content, conversationId);
+    }
+
+    @PostMapping("/groq")
+    @Operation(summary = "ThinQ AI 채팅 (Groq)", description = "Groq AI에게 메시지를 보내고 응답을 받습니다")
+    public ChatResponse chatGroq(@RequestBody ChatRequest request) {
+        String conversationId = request.conversationId() != null
+                ? request.conversationId()
+                : UUID.randomUUID().toString();
+        String content = aiService.chatGroq(conversationId, request.message());
         return new ChatResponse(content, conversationId);
     }
 }

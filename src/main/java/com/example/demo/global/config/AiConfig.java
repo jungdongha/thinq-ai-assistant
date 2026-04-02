@@ -6,6 +6,10 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -46,6 +50,29 @@ public class AiConfig {
     @Bean("claudeChatClient")
     ChatClient claudeChatClient(AnthropicChatModel model) {
         return ChatClient.builder(model)
+                .defaultSystem(systemPrompts)
+                .build();
+    }
+
+    //groq (openai-compatible)
+    @Bean("groqChatClient")
+    ChatClient groqChatClient(
+            @Value("${spring.ai.groq.api-key}") String apiKey,
+            @Value("${spring.ai.groq.base-url}") String baseUrl,
+            @Value("${spring.ai.groq.model}") String model,
+            @Value("${spring.ai.groq.max-tokens}") int maxTokens) {
+        OpenAiApi openAiApi = OpenAiApi.builder()
+                .baseUrl(baseUrl)
+                .apiKey(apiKey)
+                .build();
+        OpenAiChatOptions options = OpenAiChatOptions.builder()
+                .model(model)
+                .maxTokens(maxTokens)
+                .build();
+        return ChatClient.builder(OpenAiChatModel.builder()
+                        .openAiApi(openAiApi)
+                        .defaultOptions(options)
+                        .build())
                 .defaultSystem(systemPrompts)
                 .build();
     }

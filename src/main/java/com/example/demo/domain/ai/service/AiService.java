@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AiService {
     private final ChatClient chatClient;
+    private final ChatClient groqChatClient;
     private final ChatMemory chatMemory;
     private final ThinQDeviceTools thinQDeviceTools;
     private final ThinQRouteTools thinQRouteTools;
@@ -20,6 +21,7 @@ public class AiService {
 
     public AiService(
             @Qualifier("claudeChatClient") ChatClient chatClient,
+            @Qualifier("groqChatClient") ChatClient groqChatClient,
             ChatMemory chatMemory,
             ThinQDeviceTools thinQDeviceTools,
             ThinQRouteTools thinQRouteTools,
@@ -28,12 +30,29 @@ public class AiService {
             ThinQEnergyTools thinQEnergyTools
     ) {
         this.chatClient = chatClient;
+        this.groqChatClient = groqChatClient;
         this.chatMemory = chatMemory;
         this.thinQDeviceTools = thinQDeviceTools;
         this.thinQRouteTools = thinQRouteTools;
         this.thinQPushTools = thinQPushTools;
         this.thinQEventTools = thinQEventTools;
         this.thinQEnergyTools = thinQEnergyTools;
+    }
+
+    public String chatGroq(String conversationId, String message) {
+        return groqChatClient.prompt()
+                .user(message)
+                .advisors(spec -> spec
+                        .advisors(
+                                new SimpleLoggerAdvisor(),
+                                MessageChatMemoryAdvisor.builder(chatMemory)
+                                        .conversationId(conversationId)
+                                        .build()
+                        )
+                        .param("conversationId", conversationId))
+                .tools(thinQDeviceTools, thinQRouteTools, thinQPushTools, thinQEventTools, thinQEnergyTools)
+                .call()
+                .content();
     }
 
     public String chat(String conversationId, String message) {

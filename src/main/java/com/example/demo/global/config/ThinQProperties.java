@@ -6,5 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record ThinQProperties(
         String baseUrl,
         String patToken,
-        String apiKey
+        String apiKey,
+        String clientId
 ) {}

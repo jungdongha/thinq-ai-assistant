@@ -19,6 +19,7 @@ public class RestClientConfig {
         return RestClient.builder()
                 .baseUrl(thinQProperties.baseUrl())
                 .defaultHeader("x-api-key", thinQProperties.apiKey())
+                .defaultHeader("x-client-id", thinQProperties.clientId())
                 .defaultHeader("x-service-phase", "OP")
                 .defaultHeader("Authorization", "Bearer " + thinQProperties.patToken())
                 .requestInterceptor(messageIdInterceptor())
