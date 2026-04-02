@@ -1,4 +1,4 @@
-package com.example.demo.global.config;
+package com.example.demo.global.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

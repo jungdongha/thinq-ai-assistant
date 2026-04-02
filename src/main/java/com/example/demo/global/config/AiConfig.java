@@ -1,5 +1,6 @@
 package com.example.demo.global.config;
 
+import com.example.demo.global.properties.AiProperties;
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;

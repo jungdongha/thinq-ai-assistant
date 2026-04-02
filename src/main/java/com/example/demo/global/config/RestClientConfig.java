@@ -1,5 +1,6 @@
 package com.example.demo.global.config;
 
+import com.example.demo.global.properties.ThinQProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
