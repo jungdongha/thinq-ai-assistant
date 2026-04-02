@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 import java.nio.ByteBuffer;
@@ -15,10 +16,15 @@ import java.util.UUID;
 public class RestClientConfig {
 
     @Bean
-    RestClient ThinQRestClent(ThinQProperties thinQProperties) {
+    RestClient thinQRestClent(ThinQProperties thinQProperties) {
+        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory();
+        requestFactory.setReadTimeout(thinQProperties.readTimeout());
+
         return RestClient.builder()
+                .requestFactory(requestFactory)
                 .baseUrl(thinQProperties.baseUrl())
                 .defaultHeader("x-api-key", thinQProperties.apiKey())
+                .defaultHeader("x-client-id", thinQProperties.clientId())
                 .defaultHeader("x-service-phase", "OP")
                 .defaultHeader("Authorization", "Bearer " + thinQProperties.patToken())
                 .requestInterceptor(messageIdInterceptor())
