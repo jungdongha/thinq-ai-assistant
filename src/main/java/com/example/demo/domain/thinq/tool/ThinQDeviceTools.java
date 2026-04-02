@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class ThinQDeviceTools {
+public class ThinQDeviceTools implements ThinQTool {
     private final RestClient thinQRestClent;
 
     @Tool(description = "ThinQ에 등록된 디바이스 목록을 조회합니다.")

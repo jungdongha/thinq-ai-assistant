@@ -13,7 +13,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ThinQPushTools {
+public class ThinQPushTools implements ThinQTool {
 
     private final RestClient thinQRestClent;
 

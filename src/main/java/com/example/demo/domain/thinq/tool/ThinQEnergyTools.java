@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class ThinQEnergyTools {
+public class ThinQEnergyTools implements ThinQTool {
 
     private final RestClient thinQRestClent;
 

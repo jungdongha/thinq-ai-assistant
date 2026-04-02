@@ -9,34 +9,23 @@ import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
 public class AiService {
     private final Map<String, ChatClient> chatClients;
     private final ChatMemory chatMemory;
-    private final ThinQDeviceTools thinQDeviceTools;
-    private final ThinQRouteTools thinQRouteTools;
-    private final ThinQPushTools thinQPushTools;
-    private final ThinQEventTools thinQEventTools;
-    private final ThinQEnergyTools thinQEnergyTools;
+    private final List<ThinQTool> thinQTools;
 
     public AiService(
             Map<String, ChatClient> chatClients,
             ChatMemory chatMemory,
-            ThinQDeviceTools thinQDeviceTools,
-            ThinQRouteTools thinQRouteTools,
-            ThinQPushTools thinQPushTools,
-            ThinQEventTools thinQEventTools,
-            ThinQEnergyTools thinQEnergyTools
+            List<ThinQTool> thinQTools
     ) {
         this.chatClients = chatClients;
         this.chatMemory = chatMemory;
-        this.thinQDeviceTools = thinQDeviceTools;
-        this.thinQRouteTools = thinQRouteTools;
-        this.thinQPushTools = thinQPushTools;
-        this.thinQEventTools = thinQEventTools;
-        this.thinQEnergyTools = thinQEnergyTools;
+        this.thinQTools = thinQTools;
     }
 
     public String chat(String modelName, String conversationId, String message) {
@@ -67,7 +56,7 @@ public class AiService {
                                             .build()
                             )
                             .param("conversationId", conversationId))
-                    .tools(thinQDeviceTools, thinQRouteTools, thinQPushTools, thinQEventTools, thinQEnergyTools)
+                    .tools(thinQTools.toArray())
                     .call()
                     .content();
         } catch (Exception e) {

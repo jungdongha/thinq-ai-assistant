@@ -12,7 +12,7 @@ import org.springframework.web.client.RestClient;
 
 @Component
 @RequiredArgsConstructor
-public class ThinQRouteTools {
+public class ThinQRouteTools implements ThinQTool {
 
     private final RestClient thinQRestClent;
 

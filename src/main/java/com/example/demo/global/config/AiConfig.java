@@ -9,7 +9,7 @@ import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -17,6 +17,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.nio.charset.StandardCharsets;
 
 @Configuration
+@EnableConfigurationProperties(AiProperties.class)
 public class AiConfig {
 
     //PromptTemplate
@@ -56,18 +57,14 @@ public class AiConfig {
 
     //groq (openai-compatible)
     @Bean("groqChatClient")
-    ChatClient groqChatClient(
-            @Value("${spring.ai.groq.api-key}") String apiKey,
-            @Value("${spring.ai.groq.base-url}") String baseUrl,
-            @Value("${spring.ai.groq.model}") String model,
-            @Value("${spring.ai.groq.max-tokens}") int maxTokens) {
+    ChatClient groqChatClient(AiProperties aiProperties) {
         OpenAiApi openAiApi = OpenAiApi.builder()
-                .baseUrl(baseUrl)
-                .apiKey(apiKey)
+                .baseUrl(aiProperties.baseUrl())
+                .apiKey(aiProperties.apiKey())
                 .build();
         OpenAiChatOptions options = OpenAiChatOptions.builder()
-                .model(model)
-                .maxTokens(maxTokens)
+                .model(aiProperties.model())
+                .maxTokens(aiProperties.maxTokens())
                 .build();
         return ChatClient.builder(OpenAiChatModel.builder()
                         .openAiApi(openAiApi)
