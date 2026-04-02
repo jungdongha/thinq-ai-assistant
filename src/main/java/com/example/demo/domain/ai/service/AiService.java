@@ -1,5 +1,7 @@
 package com.example.demo.domain.ai.service;
 
+import com.example.demo.domain.ai.exception.AiException;
+import com.example.demo.domain.ai.exception.AiExceptionInformation;
 import com.example.demo.domain.thinq.tool.*;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -38,28 +40,39 @@ public class AiService {
     }
 
     public String chat(String modelName, String conversationId, String message) {
-        // 기본값: groqChatClient
-        String clientBeanName = "groqChatClient";
+        String clientBeanName;
         
-        // 요청된 모델명이 있고 해당 빈이 존재하면 교체
-        if (modelName != null && chatClients.containsKey(modelName + "ChatClient")) {
-            clientBeanName = modelName + "ChatClient";
+        if (modelName == null) {
+            // 모델명이 없으면 기본값인 groqChatClient 사용
+            clientBeanName = "groqChatClient";
+        } else {
+            // 모델명이 명시되었을 때, 지원하는 모델인지 확인
+            String expectedBeanName = modelName + "ChatClient";
+            if (!chatClients.containsKey(expectedBeanName)) {
+                throw new AiException(AiExceptionInformation.MODEL_NOT_FOUND);
+            }
+            clientBeanName = expectedBeanName;
         }
         
         ChatClient selectedClient = chatClients.get(clientBeanName);
 
-        return selectedClient.prompt()
-                .user(message)
-                .advisors(spec -> spec
-                        .advisors(
-                                new SimpleLoggerAdvisor(),
-                                MessageChatMemoryAdvisor.builder(chatMemory)
-                                        .conversationId(conversationId)
-                                        .build()
-                        )
-                        .param("conversationId", conversationId))
-                .tools(thinQDeviceTools, thinQRouteTools, thinQPushTools, thinQEventTools, thinQEnergyTools)
-                .call()
-                .content();
+        try {
+            return selectedClient.prompt()
+                    .user(message)
+                    .advisors(spec -> spec
+                            .advisors(
+                                    new SimpleLoggerAdvisor(),
+                                    MessageChatMemoryAdvisor.builder(chatMemory)
+                                            .conversationId(conversationId)
+                                            .build()
+                            )
+                            .param("conversationId", conversationId))
+                    .tools(thinQDeviceTools, thinQRouteTools, thinQPushTools, thinQEventTools, thinQEnergyTools)
+                    .call()
+                    .content();
+        } catch (Exception e) {
+            // AI 호출 중 예외 발생 시 도메인 예외로 래핑
+            throw new AiException(AiExceptionInformation.AI_CLIENT_ERROR);
+        }
     }
 }

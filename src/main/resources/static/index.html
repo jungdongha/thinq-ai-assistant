@@ -298,11 +298,14 @@
     appendMessage('user', message);
     appendMessage('ai', null);
 
-    const endpoint = currentModel === 'groq' ? `${API_BASE}/groq` : `${API_BASE}/chat`;
+    const endpoint = `${API_BASE}/chat`;
     const modelLabel = currentModel === 'groq' ? 'Groq · Llama 4 Scout' : 'Anthropic · Claude Sonnet';
 
     try {
-      const body = { message };
+      const body = { 
+        message: message,
+        model: currentModel 
+      };
       if (conversationId) body.conversationId = conversationId;
 
       const res = await fetch(endpoint, {
@@ -311,18 +314,21 @@
         body: JSON.stringify(body)
       });
 
-      const data = await res.json();
+      const jsonResponse = await res.json();
+      
+      // ApiResponse 포맷인지(jsonResponse.data가 있는지) 확인하여 데이터 추출
+      const responseData = jsonResponse.data ? jsonResponse.data : jsonResponse;
 
       if (!res.ok) {
         removeTyping();
-        appendMessage('ai', `오류: ${data.message || res.status}`);
+        appendMessage('ai', `오류: ${jsonResponse.message || res.status}`);
       } else {
-        conversationId = data.conversationId;
+        conversationId = responseData.conversationId;
         document.getElementById('session-id-display').textContent =
           conversationId.substring(0, 8) + '...';
 
         removeTyping();
-        appendMessage('ai', data.content, modelLabel);
+        appendMessage('ai', responseData.content, modelLabel);
       }
     } catch (e) {
       removeTyping();

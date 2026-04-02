@@ -23,7 +23,7 @@ spring:
         options:
           model: claude-sonnet-4-6
     groq:
-      api-key: "ENC(+5/WV2+Zd+WiY7VnKsN/4aKtOsts3bq5zj2NB8vFDVtZ/RwSmgfH3M84mqjKfUUOhfclZHlDj+q311C7S/4eOJuvPg46h1/m)"
+      api-key: ${GROQ_API_KEY}
       base-url: "https://api.groq.com/openai"
       model: "meta-llama/llama-4-scout-17b-16e-instruct"
       max-tokens: 4096

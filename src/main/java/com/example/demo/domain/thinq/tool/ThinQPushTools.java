@@ -1,8 +1,11 @@
 package com.example.demo.domain.thinq.tool;
 
+import com.example.demo.domain.thinq.exception.ThinQException;
+import com.example.demo.domain.thinq.exception.ThinQExceptionInformation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -18,13 +21,15 @@ public class ThinQPushTools {
     public List<String> getPushSubscriptions(
             @ToolParam(description = "ISO 3166-1 alpha-2 국가 코드 (예: KR, US, GB)") String country
     ) {
-        PushListApiResponse apiResponse = thinQRestClent.get()
+        return thinQRestClent.get()
                 .uri("/push")
                 .header("x-country", country)
                 .retrieve()
-                .body(PushListApiResponse.class);
-
-        return apiResponse.response().stream()
+                .onStatus(HttpStatusCode::isError, (request, response) -> {
+                    throw new ThinQException(ThinQExceptionInformation.THINQ_API_ERROR);
+                })
+                .body(PushListApiResponse.class)
+                .response().stream()
                 .map(PushItem::deviceId)
                 .toList();
     }
@@ -33,13 +38,15 @@ public class ThinQPushTools {
     public List<String> getPushClientSubscriptions(
             @ToolParam(description = "ISO 3166-1 alpha-2 국가 코드 (예: KR, US, GB)") String country
     ) {
-        PushClientListApiResponse apiResponse = thinQRestClent.get()
+        return thinQRestClent.get()
                 .uri("/push/devices")
                 .header("x-country", country)
                 .retrieve()
-                .body(PushClientListApiResponse.class);
-
-        return apiResponse.response();
+                .onStatus(HttpStatusCode::isError, (request, response) -> {
+                    throw new ThinQException(ThinQExceptionInformation.THINQ_API_ERROR);
+                })
+                .body(PushClientListApiResponse.class)
+                .response();
     }
 
     private record PushListApiResponse(String messageId, String timestamp, List<PushItem> response) {}
