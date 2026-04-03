@@ -21,13 +21,12 @@ import java.nio.charset.StandardCharsets;
 @EnableConfigurationProperties(AiProperties.class)
 public class AiConfig {
 
-    //PromptTemplate
-    String systemPrompts;
-    {
+    @Bean
+    String systemPromptTemplate() {
         try {
-            systemPrompts = new ClassPathResource("prompts/system.st").getContentAsString(StandardCharsets.UTF_8);
+            return new ClassPathResource("prompts/system.st").getContentAsString(StandardCharsets.UTF_8);
         } catch (Exception e) {
-            systemPrompts = "";
+            return "";
         }
     }
 
@@ -51,9 +50,7 @@ public class AiConfig {
     //claude
     @Bean("claudeChatClient")
     ChatClient claudeChatClient(AnthropicChatModel model) {
-        return ChatClient.builder(model)
-                .defaultSystem(systemPrompts)
-                .build();
+        return ChatClient.builder(model).build();
     }
 
     //groq (openai-compatible)
@@ -71,7 +68,6 @@ public class AiConfig {
                         .openAiApi(openAiApi)
                         .defaultOptions(options)
                         .build())
-                .defaultSystem(systemPrompts)
                 .build();
     }
 }

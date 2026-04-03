@@ -7,8 +7,10 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -17,15 +19,18 @@ public class AiService {
     private final Map<String, ChatClient> chatClients;
     private final ChatMemory chatMemory;
     private final List<ThinQTool> thinQTools;
+    private final String systemPromptTemplate;
 
     public AiService(
             Map<String, ChatClient> chatClients,
             ChatMemory chatMemory,
-            List<ThinQTool> thinQTools
+            List<ThinQTool> thinQTools,
+            @Qualifier("systemPromptTemplate") String systemPromptTemplate
     ) {
         this.chatClients = chatClients;
         this.chatMemory = chatMemory;
         this.thinQTools = thinQTools;
+        this.systemPromptTemplate = systemPromptTemplate;
     }
 
     public String chat(String modelName, String conversationId, String message) {
@@ -45,8 +50,12 @@ public class AiService {
         
         ChatClient selectedClient = chatClients.get(clientBeanName);
 
+        String currentDate = LocalDate.now().toString();
+        String systemPrompt = systemPromptTemplate.replace("{currentDate}", currentDate);
+
         try {
             return selectedClient.prompt()
+                    .system(systemPrompt)
                     .user(message)
                     .advisors(spec -> spec
                             .advisors(
