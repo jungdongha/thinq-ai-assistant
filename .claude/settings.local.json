@@ -12,7 +12,8 @@
       "Bash(sleep 10:*)",
       "Bash(netstat:*)",
       "Bash(sleep 8:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(cd /c/Users/251203/eclipse-workspace/demo1 && ./gradlew compileJava 2>&1)"
     ]
   }
 }
