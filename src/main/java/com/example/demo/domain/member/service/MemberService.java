@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final MemberGetServcice memberGetServcice;
+    private final MemberGetService memberGetService;
 
     public MemberResponse createMember(MemberCreateRequest request) {
         if (memberRepository.existsByEmail(request.email())) {
@@ -37,13 +37,13 @@ public class MemberService {
     }
 
     public MemberResponse updateMember(Long id, MemberUpdateRequest request) {
-        Member member = memberGetServcice.getMember(id);
+        Member member = memberGetService.getMember(id);
         member.updateMember(request.nickname());
         return MemberResponse.from(member);
     }
 
     public void deleteMember(Long id) {
-        Member member = memberGetServcice.getMember(id);
+        Member member = memberGetService.getMember(id);
         memberRepository.delete(member);
     }
 }

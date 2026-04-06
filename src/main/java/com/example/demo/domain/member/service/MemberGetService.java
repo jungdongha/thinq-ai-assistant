@@ -1,6 +1,5 @@
 package com.example.demo.domain.member.service;
 
-
 import com.example.demo.domain.member.dto.response.MemberResponse;
 import com.example.demo.domain.member.entity.Member;
 import com.example.demo.domain.member.exception.MemberException;
@@ -14,12 +13,11 @@ import static com.example.demo.domain.member.exception.MemberExceptionInformatio
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+public class MemberGetService {
 
-public class MemberGetServcice {
     private final MemberRepository memberRepository;
 
-
-    public MemberResponse getMemberResposne(Long id) {
+    public MemberResponse getMemberResponse(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
         return MemberResponse.from(member);
@@ -28,5 +26,6 @@ public class MemberGetServcice {
     //내부 로직용
     public Member getMember(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));}
+                .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
+    }
 }
