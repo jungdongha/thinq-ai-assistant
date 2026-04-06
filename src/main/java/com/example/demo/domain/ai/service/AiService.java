@@ -4,6 +4,7 @@ import com.example.demo.domain.ai.exception.AiException;
 import com.example.demo.domain.ai.exception.AiExceptionInformation;
 import com.example.demo.domain.thinq.tool.ThinQTool;
 import com.example.demo.global.advisor.CustomLoggingAdvisor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class AiService {
     private final Map<String, ChatClient> chatClients;
@@ -37,10 +39,8 @@ public class AiService {
         String clientBeanName;
         
         if (modelName == null) {
-            // 모델명이 없으면 기본값인 groqChatClient 사용
             clientBeanName = "groqChatClient";
         } else {
-            // 모델명이 명시되었을 때, 지원하는 모델인지 확인
             String expectedBeanName = modelName + "ChatClient";
             if (!chatClients.containsKey(expectedBeanName)) {
                 throw new AiException(AiExceptionInformation.MODEL_NOT_FOUND);
@@ -69,7 +69,7 @@ public class AiService {
                     .call()
                     .content();
         } catch (Exception e) {
-            // AI 호출 중 예외 발생 시 도메인 예외로 래핑
+            log.error("AI Client Error [model: {}, conversationId: {}]: {}", clientBeanName, conversationId, e.getMessage(), e);
             throw new AiException(AiExceptionInformation.AI_CLIENT_ERROR);
         }
     }
