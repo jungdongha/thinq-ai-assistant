@@ -2,10 +2,10 @@ package com.example.demo.domain.ai.service;
 
 import com.example.demo.domain.ai.exception.AiException;
 import com.example.demo.domain.ai.exception.AiExceptionInformation;
-import com.example.demo.domain.thinq.tool.*;
+import com.example.demo.domain.thinq.tool.ThinQTool;
+import com.example.demo.global.advisor.CustomLoggingAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -59,7 +59,7 @@ public class AiService {
                     .user(message)
                     .advisors(spec -> spec
                             .advisors(
-                                    new SimpleLoggerAdvisor(),
+                                    new CustomLoggingAdvisor(),
                                     MessageChatMemoryAdvisor.builder(chatMemory)
                                             .conversationId(conversationId)
                                             .build()
