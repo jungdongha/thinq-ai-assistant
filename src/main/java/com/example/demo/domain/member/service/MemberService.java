@@ -10,7 +10,7 @@ import com.example.demo.domain.member.exception.MemberExceptionInformation;
 import com.example.demo.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class MemberService {
     private final MemberRepository memberRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final MemberGetService memberGetService;
 
     public MemberResponse createMember(MemberCreateRequest request) {

@@ -3,23 +3,29 @@ package com.example.demo.global.security;
 import com.example.demo.global.properties.JwtProperties;
 import com.example.demo.global.security.jwt.JwtFilter;
 import com.example.demo.global.security.jwt.JwtProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Configuration
@@ -28,6 +34,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -39,6 +46,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.anyRequest().permitAll()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                        .accessDeniedHandler(accessDeniedHandler())
+                )
                 .addFilterBefore(new JwtFilter(jwtProvider),
                         UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -48,6 +59,30 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(objectMapper.writeValueAsString(
+                    Map.of("status", 401, "code", "AUTH-000", "message", "인증이 필요합니다.")
+            ));
+        };
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(objectMapper.writeValueAsString(
+                    Map.of("status", 403, "code", "AUTH-006", "message", "접근 권한이 없습니다.")
+            ));
+        };
     }
 
     // WebConfig의 addCorsMappings()는 MVC 레이어 → Security 필터 레이어는 별도 설정 필요

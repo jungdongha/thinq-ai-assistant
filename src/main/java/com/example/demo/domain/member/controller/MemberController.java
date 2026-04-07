@@ -6,10 +6,12 @@ import com.example.demo.domain.member.dto.response.MemberResponse;
 import com.example.demo.domain.member.service.MemberGetService;
 import com.example.demo.domain.member.service.MemberService;
 import com.example.demo.global.common.response.ApiResponse;
+import com.example.demo.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Member", description = "회원 관리 API")
@@ -29,27 +31,27 @@ public class MemberController implements MemberSwagger {
         return ApiResponse.response(HttpStatus.CREATED, "회원가입 성공", memberService.createMember(request));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/me")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<MemberResponse> getMember(
-            @PathVariable Long id
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ApiResponse.response(HttpStatus.OK, "회원 단건 조회 성공", memberGetService.getMemberResponse(id));
+        return ApiResponse.response(HttpStatus.OK, "회원 단건 조회 성공", memberGetService.getMemberResponse(userDetails.getMemberId()));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/me")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<MemberResponse> updateMember(
-            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid MemberUpdateRequest request
     ) {
-        return ApiResponse.response(HttpStatus.OK, "회원 정보 수정 성공", memberService.updateMember(id, request));
+        return ApiResponse.response(HttpStatus.OK, "회원 정보 수정 성공", memberService.updateMember(userDetails.getMemberId(), request));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ApiResponse<Void> deleteMember(@PathVariable Long id) {
-        memberService.deleteMember(id);
+    public ApiResponse<Void> deleteMember(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        memberService.deleteMember(userDetails.getMemberId());
         return ApiResponse.response(HttpStatus.NO_CONTENT, "회원 탈퇴 성공");
     }
 }
